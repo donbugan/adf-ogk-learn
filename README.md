@@ -7,7 +7,7 @@
 
 - Pipelines are named with prefix `pl_`.
 
-- Pipeline activities are named with prefix `act`.
+- Pipeline activities are named with prefix `act_`.
 
 - Datasets are named with prefix `ds_`.
 
