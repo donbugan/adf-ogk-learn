@@ -5,11 +5,20 @@
 			"referenceName": "ls_ogk_blob",
 			"type": "LinkedServiceReference"
 		},
+		"parameters": {
+			"sink_file": {
+				"type": "string"
+			}
+		},
 		"annotations": [],
 		"type": "DelimitedText",
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
+				"fileName": {
+					"value": "@dataset().sink_file",
+					"type": "Expression"
+				},
 				"container": "curated"
 			},
 			"columnDelimiter": ",",
