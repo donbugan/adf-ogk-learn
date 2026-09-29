@@ -16,11 +16,11 @@
 				"userProperties": [
 					{
 						"name": "Source",
-						"value": "raw/fleet/Vehicle_Master.csv"
+						"value": "raw/fleet/@{pipeline().parameters.source_file}"
 					},
 					{
 						"name": "Destination",
-						"value": "curated//"
+						"value": "curated//@{pipeline().parameters.sink_file}"
 					}
 				],
 				"typeProperties": {
