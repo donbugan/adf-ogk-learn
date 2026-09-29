@@ -1,0 +1,15 @@
+{
+	"name": "adf-ogk-learn",
+	"properties": {
+		"trustModeClaimForMi": {
+			"value": "Disabled",
+			"editable": true
+		}
+	},
+	"location": "southafricanorth",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "6dd9ef6b-b648-486f-96c6-1a5ad50d6ac7",
+		"tenantId": "5b760794-1026-45d8-9ef6-886474373244"
+	}
+}

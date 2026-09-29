@@ -1,0 +1,94 @@
+{
+	"name": "ds_fleet_vehicles_csv",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_ogk_blob",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": "Vehicle_Master.csv",
+				"folderPath": "fleet",
+				"container": "raw"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "Vehicle_ID",
+				"type": "String"
+			},
+			{
+				"name": "Registration_No",
+				"type": "String"
+			},
+			{
+				"name": "Vehicle_Category",
+				"type": "String"
+			},
+			{
+				"name": "Department",
+				"type": "String"
+			},
+			{
+				"name": "Depot_Location",
+				"type": "String"
+			},
+			{
+				"name": "Purchase_Date",
+				"type": "String"
+			},
+			{
+				"name": "Odometer_KM",
+				"type": "String"
+			},
+			{
+				"name": "Fuel_Type",
+				"type": "String"
+			},
+			{
+				"name": "Monthly_Fuel_Cost_R",
+				"type": "String"
+			},
+			{
+				"name": "Maintenance_Cost_YTD_R",
+				"type": "String"
+			},
+			{
+				"name": "Breakdowns_YTD",
+				"type": "String"
+			},
+			{
+				"name": "Downtime_Days_YTD",
+				"type": "String"
+			},
+			{
+				"name": "Last_Service_Date",
+				"type": "String"
+			},
+			{
+				"name": "Next_Service_Due",
+				"type": "String"
+			},
+			{
+				"name": "Status",
+				"type": "String"
+			},
+			{
+				"name": "Driver_Assigned",
+				"type": "String"
+			},
+			{
+				"name": "Utilization_Hours_Monthly",
+				"type": "String"
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}
