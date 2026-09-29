@@ -15,7 +15,11 @@
 
 ### Pipeline
 
-- `pl_copy_fleet_vehicles` copies Vehicle_Master.csv from the raw container (dataset ds_fleet_vehicles_csv) to the curated container (dataset ds_fleet_vehicles_curated).
+- `pl_copy_fleet_vehicles` copies a CSV from the `raw` container (dataset `ds_fleet_vehicles_csv`) to the `curated` container (dataset `ds_fleet_vehicles_curated`), using the copy activity `act_copy_fleet_master`.
+
+- File names are pipeline parameters, supplied at run time:
+  - `source_file`, default `Vehicle_Master.csv`
+  - `sink_file`, default `vehicles_curated.csv`
 
 - The source file was uploaded manually.
 
