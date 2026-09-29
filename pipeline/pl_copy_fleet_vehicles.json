@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "COPY FleetMaster",
+				"name": "act_copy_fleet_master",
 				"type": "Copy",
 				"dependsOn": [],
 				"policy": {
