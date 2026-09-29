@@ -5,12 +5,20 @@
 			"referenceName": "ls_ogk_blob",
 			"type": "LinkedServiceReference"
 		},
+		"parameters": {
+			"source_file": {
+				"type": "string"
+			}
+		},
 		"annotations": [],
 		"type": "DelimitedText",
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
-				"fileName": "Vehicle_Master.csv",
+				"fileName": {
+					"value": "@dataset().source_file",
+					"type": "Expression"
+				},
 				"folderPath": "fleet",
 				"container": "raw"
 			},
