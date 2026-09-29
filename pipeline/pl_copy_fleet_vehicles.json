@@ -277,7 +277,13 @@
 				"outputs": [
 					{
 						"referenceName": "ds_fleet_vehicles_curated",
-						"type": "DatasetReference"
+						"type": "DatasetReference",
+						"parameters": {
+							"sink_file": {
+								"value": "@pipeline().parameters.sink_file",
+								"type": "Expression"
+							}
+						}
 					}
 				]
 			}
@@ -286,6 +292,10 @@
 			"source_file": {
 				"type": "string",
 				"defaultValue": "Vehicle_Master.csv"
+			},
+			"sink_file": {
+				"type": "string",
+				"defaultValue": "vehicles_curated.csv"
 			}
 		},
 		"annotations": [],
