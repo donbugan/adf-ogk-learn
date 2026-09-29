@@ -20,7 +20,7 @@
 					},
 					{
 						"name": "Destination",
-						"value": "curated//@{pipeline().parameters.sink_file}"
+						"value": "curated/@{pipeline().parameters.sink_file}"
 					}
 				],
 				"typeProperties": {
