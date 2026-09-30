@@ -365,6 +365,41 @@
 								}
 							]
 						}
+					],
+					"ifTrueActivities": [
+						{
+							"name": "act_create_report",
+							"type": "WebActivity",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"method": "PUT",
+								"headers": {
+									"x-ms-blob-type": "BlockBlob",
+									"x-ms-version": "2021-08-06",
+									"Content-Type": "application/json"
+								},
+								"url": {
+									"value": "@concat(\n    'https://ogksa.blob.core.windows.net/reports/', \n    pipeline().RunId, \n    '.json')",
+									"type": "Expression"
+								},
+								"body": {
+									"value": "@string(activity('act_filter_nulls').output)",
+									"type": "Expression"
+								},
+								"authentication": {
+									"type": "MSI",
+									"resource": "https://storage.azure.com/"
+								}
+							}
+						}
 					]
 				}
 			}
