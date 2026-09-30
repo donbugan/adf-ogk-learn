@@ -17,10 +17,15 @@
 
 ## Security
  - Production would move to Key Vault or the factory's managed identity.
+ - Factory's managed identity granted Storage Blob Data Contributor on the `reports` container only, not the storage account.
+ - Least privilege: the factory can write reports without an account key, and nothing else.
 
 ## Naming Conventions
- - ls_, ds_, pl_, act_, underscores.
+ - ls_, ds_, pl_, act_, trg_, underscores.
+    - Single `act_` prefix for all activity types.
+    - `trg_` for triggers.
  - ADF doesn't allow dashes in linked service, dataset or data flow names.
+ - Revisit if names become ambiguous as the pipeline grows.
 
 ## Source Data and Formatting
  - CSV over Excel as source.
@@ -30,7 +35,13 @@
  
 ## Data Quality
  - Keep the blank-row defect in the source.
- - Kept as test data for a data quality rule, to be handled in the pipeline instead of patched upstream.
+ - **Reason** Kept as test data for a data quality rule, to be handled in the pipeline instead of patched upstream.
+ - Defects are detected before the copy, so bad rows never reach `curated` unhandled.
+ - Detection uses Lookup + Filter. Get Metadata was ruled out: it reports file properties, never rows.
+ - Lookup returns at most 5,000 rows / 4 MB. Fine for this file; larger files need a data flow or SQL.
+ - Known, harmless defects (e.g. fully blank rows) fixes and reporting is in progress.
+    - **Assumption** Silence from the data provider is consent.
+ - Structural changes (columns added, removed, renamed) are not auto-fixed. Stop or quarantine, and report.
  - Sink quoting: Quote everything, per the default behaviour.
  - Pipeline will benefit from a different validation heuristic:
     - Currently there is no number validation.
@@ -38,6 +49,9 @@
        - CSV carries no types, so every column maps as String.
        - Quoting all values reinforces that for downstream tools.
 
+## Triggers
+ - `trg_copy_fleet_vehicles` started once to verify a scheduled run, then stopped to avoid cost.
+   
 ## Repo Visibility
  - Public after review.
  - Linked service JSON holds a credential reference, not the key; factory JSON holds identifiers only.
