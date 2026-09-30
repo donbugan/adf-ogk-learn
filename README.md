@@ -3,7 +3,7 @@
 
 - Linked services are named with prefix `ls_`.
  
--  Containers are directly named `raw` and `curated`.
+-  Containers are directly named `raw`, `curated` and `reports`.
 
 - Pipelines are named with prefix `pl_`.
 
@@ -19,7 +19,12 @@
 
 ### Pipeline
 
-- `pl_copy_fleet_vehicles` copies a CSV from the `raw` container (dataset `ds_fleet_vehicles_csv`) to the `curated` container (dataset `ds_fleet_vehicles_curated`), using the copy activity `act_copy_fleet_master`.
+- `pl_copy_fleet_vehicles` checks the source file before copying it:
+  1. `act_lookup_fleet_source` reads every row of the file in `raw`.
+  2. `act_filter_nulls` keeps rows where `Vehicle_ID` is empty.
+  3. `act_if_null_rows_found` branches on whether any were found.
+     - **False (clean file):** `act_copy_fleet_master` copies the file to `curated`.
+     - **True (defects found):** `act_create_report` writes a JSON report to `reports/<run_id>.json`. Nothing is copied to `curated` yet; the cleanse step is in progress.
 
 - File names are pipeline parameters, supplied at run time:
   - `source_file`, default `Vehicle_Master.csv`
@@ -33,6 +38,11 @@
 
 - Currently **stopped**. It was started once to verify a scheduled run (56 rows in, 56 out), then stopped to avoid cost.
 
+### Report
+
+- Written by a Web activity calling Blob Storage directly, authenticated with the factory's managed identity (write access to `reports` only).
+- Contains: source file, run ID, run time (UTC), the rule applied, the action taken, rows checked, rows flagged, and the flagged rows themselves.
+
 ### Validation
 
 - A defect was found during run verification as 56 rows in the run recorded against 55 rows in the source file. 
@@ -44,18 +54,20 @@
 ### Known Defect
 #### What: The source export included an empty trailing row.
 
-#### Mitigation (Planned): check for blanks in one of 3 ways:
-1. Mapping data flow with a Filter step 
+#### Mitigation: three approaches
+1. Mapping data flow with a Filter step. **In progress** (cleanse step).
 
-   Cost: Spark cluster, with dollar based cost implications unless the debug time-to-live is set to low.
-   
-2. Validation in the pipeline: Lookup or Get Metadata activity and If Condition that fails the run or alerts on issues with the file.
+   Cost: Spark cluster, billed while debug is on. Keep the debug time-to-live low.
 
-   Detection only.
+2. Validation in the pipeline: Lookup, Filter and If Condition, with a report on defects found. **Built.**
+
+   Detection only. Get Metadata was ruled out: it reads file properties, not rows.
 
    Cost: Cheap.
-   
-3. Database sink that can be filtered in SQL. (Warehouse production standard to be followed).
+
+3. Database sink that can be filtered in SQL. **Planned.**
+
+   Cost: Azure SQL database with possible dollar cost implications.
 
    Cost: Azure SQL database with possible dollar cost implications
 
