@@ -1,4 +1,19 @@
 # adf-ogk-learn
+## About
+
+### A portfolio project: 
+ - Azure Data Factory pipeline built from scratch.
+ - Version-controlled in Git, with data quality checks and reporting.
+
+### Execution Steps:
+- A CSV is uploaded manually to the `raw` container in Azure Blob Storage.
+- The pipeline reads every row and checks for rows with an empty `Vehicle_ID`.
+- Clean file: it is copied to the `curated` container.
+- Null rows found: nothing is copied, and a JSON report of what was found is written to the `reports` container.
+- Work in progress: a cleansing step to remove bad rows and deliver the clean file is next.
+
+Design choices and trade-offs are recorded in [docs/decisions.md](docs/decisions.md).
+  
 ## Naming conventions
 
 - Linked services are named with prefix `ls_`.
