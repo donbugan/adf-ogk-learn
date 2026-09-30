@@ -286,6 +286,66 @@
 						}
 					}
 				]
+			},
+			{
+				"name": "act_lookup_fleet_source",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "ds_fleet_vehicles_csv",
+						"type": "DatasetReference",
+						"parameters": {
+							"source_file": {
+								"value": "@pipeline().parameters.source_file",
+								"type": "Expression"
+							}
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "act_filter_nulls",
+				"type": "Filter",
+				"dependsOn": [
+					{
+						"activity": "act_lookup_fleet_source",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('act_lookup_fleet_source').output.value",
+						"type": "Expression"
+					},
+					"condition": {
+						"value": "@empty(item().Vehicle_ID)",
+						"type": "Expression"
+					}
+				}
 			}
 		],
 		"parameters": {
