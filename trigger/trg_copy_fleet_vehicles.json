@@ -4,13 +4,24 @@
 		"description": "Copy fleet vehicle data ",
 		"annotations": [],
 		"runtimeState": "Stopped",
-		"pipelines": [],
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "pl_copy_fleet_vehicles",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"source_file": "Vehicle_Master.csv",
+					"sink_file": "vehicles_curated.csv"
+				}
+			}
+		],
 		"type": "ScheduleTrigger",
 		"typeProperties": {
 			"recurrence": {
 				"frequency": "Hour",
 				"interval": 3,
-				"startTime": "2026-09-30T13:50:00",
+				"startTime": "2026-09-30T13:47:00",
 				"timeZone": "South Africa Standard Time"
 			}
 		}
