@@ -11,6 +11,8 @@
 
 - Datasets are named with prefix `ds_`.
 
+- Triggers are named with prefix `trg`.
+
 ## Components
 
 ### Pipeline
