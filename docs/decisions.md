@@ -1,8 +1,6 @@
 # Decisions (Before and During)
 ## Caveat
- - This is a learning repo.
- - Decisions recorded in this document are geared towards this.
- - The goal is to keep cost to a minimum or within the free thresholds for ADF.
+ - Portfolio project on an Azure free trial; decisions favour minimal cost.
    
 ## Storage
  - Plain Blob, ADLS Gen2 to be configured in future branch.
@@ -10,7 +8,7 @@
 
 ## Infrastructure 
  - Locally-Redundant Storage.
- - Learning data doesn't need a second region.
+ - Sample data doesn't need a second region.
  - Geo-Redundant Storage roughly doubles the cost.
  - South Africa North for everything. Matches the factory and keeps data in-country.
  - Public network access, account key auth.
@@ -39,7 +37,9 @@
  - Defects are detected before the copy, so bad rows never reach `curated` unhandled.
  - Detection uses Lookup + Filter. Get Metadata was ruled out: it reports file properties, never rows.
  - Lookup returns at most 5,000 rows / 4 MB. Fine for this file; larger files need a data flow or SQL.
- - Known, harmless defects (e.g. fully blank rows) fixes and reporting is in progress.
+ - Known, harmless defects (e.g. fully blank rows):
+    - Reporting built.
+    - Automatic fix in progress.
     - **Assumption** Silence from the data provider is consent.
  - Structural changes (columns added, removed, renamed) are not auto-fixed. Stop or quarantine, and report.
  - Sink quoting: Quote everything, per the default behaviour.
