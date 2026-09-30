@@ -391,7 +391,7 @@
 									"type": "Expression"
 								},
 								"body": {
-									"value": "@string(activity('act_filter_nulls').output)",
+									"value": "{\n  \"source_file\": \"@{pipeline().parameters.source_file}\",\n  \"run_id\": \"@{pipeline().RunId}\",\n  \"run_time_utc\": \"@{utcNow()}\",\n  \"rule\": \"Rows with empty Vehicle_ID\",\n  \"action\": \"Pending: cleanse step not yet built\",\n  \"rows_checked\": @{activity('act_filter_nulls').output.ItemsCount},\n  \"rows_flagged\": @{activity('act_filter_nulls').output.FilteredItemsCount},\n  \"flagged_rows\": @{activity('act_filter_nulls').output.Value}\n}",
 									"type": "Expression"
 								},
 								"authentication": {
