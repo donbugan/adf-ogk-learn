@@ -69,8 +69,6 @@
 
    Cost: Azure SQL database with possible dollar cost implications.
 
-   Cost: Azure SQL database with possible dollar cost implications
-
 ## Cost Management
 
 - This repo will take advantage of free credits of $200 until free trial ends in 30 days.
