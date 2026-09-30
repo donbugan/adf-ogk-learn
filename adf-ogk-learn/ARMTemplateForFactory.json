@@ -499,7 +499,7 @@
 			"properties": {
 				"description": "Copy fleet vehicle data ",
 				"annotations": [],
-				"runtimeState": "Started",
+				"runtimeState": "Stopped",
 				"pipelines": [
 					{
 						"pipelineReference": {
