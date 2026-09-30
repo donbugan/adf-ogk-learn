@@ -25,6 +25,12 @@
 
 - The source file was uploaded manually.
 
+### Trigger
+
+- `trg_copy_fleet_vehicles` runs `pl_copy_fleet_vehicles` every 3 hours (South Africa Standard Time), passing the default file names.
+
+- Currently **stopped**. It was started once to verify a scheduled run (56 rows in, 56 out), then stopped to avoid cost.
+
 ### Validation
 
 - A defect was found during run verification as 56 rows in the run recorded against 55 rows in the source file. 
