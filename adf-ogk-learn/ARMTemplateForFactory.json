@@ -1,0 +1,530 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "adf-ogk-learn"
+		},
+		"ls_ogk_blob_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'ls_ogk_blob'"
+		},
+		"trg_copy_fleet_vehicles_properties_pl_copy_fleet_vehicles_parameters_source_file": {
+			"type": "string",
+			"defaultValue": "Vehicle_Master.csv"
+		},
+		"trg_copy_fleet_vehicles_properties_pl_copy_fleet_vehicles_parameters_sink_file": {
+			"type": "string",
+			"defaultValue": "vehicles_curated.csv"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/pl_copy_fleet_vehicles')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "act_copy_fleet_master",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [
+							{
+								"name": "Source",
+								"value": "raw/fleet/@{pipeline().parameters.source_file}"
+							},
+							{
+								"name": "Destination",
+								"value": "curated/@{pipeline().parameters.sink_file}"
+							}
+						],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobStorageWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "Vehicle_ID",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "Vehicle_ID",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Registration_No",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "Registration_No",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Vehicle_Category",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "Vehicle_Category",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Department",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "Department",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Depot_Location",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "Depot_Location",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Purchase_Date",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "Purchase_Date",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Odometer_KM",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "Odometer_KM",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Fuel_Type",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "Fuel_Type",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Monthly_Fuel_Cost_R",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "Monthly_Fuel_Cost_R",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Maintenance_Cost_YTD_R",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "Maintenance_Cost_YTD_R",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Breakdowns_YTD",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "Breakdowns_YTD",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Downtime_Days_YTD",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "Downtime_Days_YTD",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Last_Service_Date",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "Last_Service_Date",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Next_Service_Due",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "Next_Service_Due",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Status",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "Status",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Driver_Assigned",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "Driver_Assigned",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Utilization_Hours_Monthly",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "Utilization_Hours_Monthly",
+											"type": "String",
+											"physicalType": "String"
+										}
+									}
+								],
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "ds_fleet_vehicles_csv",
+								"type": "DatasetReference",
+								"parameters": {
+									"source_file": {
+										"value": "@pipeline().parameters.source_file",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "ds_fleet_vehicles_curated",
+								"type": "DatasetReference",
+								"parameters": {
+									"sink_file": {
+										"value": "@pipeline().parameters.sink_file",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"source_file": {
+						"type": "string",
+						"defaultValue": "Vehicle_Master.csv"
+					},
+					"sink_file": {
+						"type": "string",
+						"defaultValue": "vehicles_curated.csv"
+					}
+				},
+				"annotations": [],
+				"lastPublishTime": "2026-09-29T18:07:56Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/ds_fleet_vehicles_csv')]",
+				"[concat(variables('factoryId'), '/datasets/ds_fleet_vehicles_curated')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_fleet_vehicles_csv')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_ogk_blob",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"source_file": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": {
+							"value": "@dataset().source_file",
+							"type": "Expression"
+						},
+						"folderPath": "fleet",
+						"container": "raw"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "Vehicle_ID",
+						"type": "String"
+					},
+					{
+						"name": "Registration_No",
+						"type": "String"
+					},
+					{
+						"name": "Vehicle_Category",
+						"type": "String"
+					},
+					{
+						"name": "Department",
+						"type": "String"
+					},
+					{
+						"name": "Depot_Location",
+						"type": "String"
+					},
+					{
+						"name": "Purchase_Date",
+						"type": "String"
+					},
+					{
+						"name": "Odometer_KM",
+						"type": "String"
+					},
+					{
+						"name": "Fuel_Type",
+						"type": "String"
+					},
+					{
+						"name": "Monthly_Fuel_Cost_R",
+						"type": "String"
+					},
+					{
+						"name": "Maintenance_Cost_YTD_R",
+						"type": "String"
+					},
+					{
+						"name": "Breakdowns_YTD",
+						"type": "String"
+					},
+					{
+						"name": "Downtime_Days_YTD",
+						"type": "String"
+					},
+					{
+						"name": "Last_Service_Date",
+						"type": "String"
+					},
+					{
+						"name": "Next_Service_Due",
+						"type": "String"
+					},
+					{
+						"name": "Status",
+						"type": "String"
+					},
+					{
+						"name": "Driver_Assigned",
+						"type": "String"
+					},
+					{
+						"name": "Utilization_Hours_Monthly",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_ogk_blob')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_fleet_vehicles_curated')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_ogk_blob",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"sink_file": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": {
+							"value": "@dataset().sink_file",
+							"type": "Expression"
+						},
+						"container": "curated"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_ogk_blob')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ls_ogk_blob')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"connectionString": "[parameters('ls_ogk_blob_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/trg_copy_fleet_vehicles')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Copy fleet vehicle data ",
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "pl_copy_fleet_vehicles",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"source_file": "[parameters('trg_copy_fleet_vehicles_properties_pl_copy_fleet_vehicles_parameters_source_file')]",
+							"sink_file": "[parameters('trg_copy_fleet_vehicles_properties_pl_copy_fleet_vehicles_parameters_sink_file')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Hour",
+						"interval": 3,
+						"startTime": "2026-09-30T13:47:00",
+						"timeZone": "South Africa Standard Time"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/pl_copy_fleet_vehicles')]"
+			]
+		}
+	]
+}

@@ -1,0 +1,24 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "adf-ogk-learn"
+		},
+		"ls_ogk_blob_connectionString": {
+			"value": ""
+		},
+		"trg_copy_fleet_vehicles_properties_pl_copy_fleet_vehicles_parameters_source_file": {
+			"value": "Vehicle_Master.csv"
+		},
+		"trg_copy_fleet_vehicles_properties_pl_copy_fleet_vehicles_parameters_sink_file": {
+			"value": "vehicles_curated.csv"
+		},
+		"containerUri": {
+			"value": ""
+		},
+		"containerSasToken": {
+			"value": ""
+		}
+	}
+}

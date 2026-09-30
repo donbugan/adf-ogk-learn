@@ -1,0 +1,63 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "adf-ogk-learn"
+		},
+		"ls_ogk_blob_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'ls_ogk_blob'"
+		},
+		"trg_copy_fleet_vehicles_properties_pl_copy_fleet_vehicles_parameters_source_file": {
+			"type": "string",
+			"defaultValue": "Vehicle_Master.csv"
+		},
+		"trg_copy_fleet_vehicles_properties_pl_copy_fleet_vehicles_parameters_sink_file": {
+			"type": "string",
+			"defaultValue": "vehicles_curated.csv"
+		},
+		"containerUri": {
+			"type": "string",
+			"metadata": "URI to storage account containing linked ARM templates"
+		},
+		"containerSasToken": {
+			"type": "string",
+			"metadata": "Sas token to storage account containing linked ARM templates"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "adf-ogk-learn_ArmTemplate_0",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2024-03-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_0.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
+					"ls_ogk_blob_connectionString": {
+						"value": "[parameters('ls_ogk_blob_connectionString')]"
+					},
+					"trg_copy_fleet_vehicles_properties_pl_copy_fleet_vehicles_parameters_source_file": {
+						"value": "[parameters('trg_copy_fleet_vehicles_properties_pl_copy_fleet_vehicles_parameters_source_file')]"
+					},
+					"trg_copy_fleet_vehicles_properties_pl_copy_fleet_vehicles_parameters_sink_file": {
+						"value": "[parameters('trg_copy_fleet_vehicles_properties_pl_copy_fleet_vehicles_parameters_sink_file')]"
+					}
+				}
+			},
+			"dependsOn": []
+		}
+	]
+}
