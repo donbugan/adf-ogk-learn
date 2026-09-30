@@ -8,6 +8,8 @@
 - Pipelines are named with prefix `pl_`.
 
 - Pipeline activities are named with prefix `act_`.
+  - Single `act_` prefix for all activity types;
+  - revisit if names become ambiguous as the pipeline grows.
 
 - Datasets are named with prefix `ds_`.
 
