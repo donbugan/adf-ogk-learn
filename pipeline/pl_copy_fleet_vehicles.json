@@ -5,7 +5,14 @@
 			{
 				"name": "act_lookup_fleet_source",
 				"type": "Lookup",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "act_check_metadata_conditions",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"policy": {
 					"timeout": "0.12:00:00",
 					"retry": 0,
@@ -444,6 +451,77 @@
 									"computeType": "General"
 								},
 								"traceLevel": "Fine"
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "act_get_source_metadata",
+				"type": "GetMetadata",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "ds_fleet_vehicles_csv",
+						"type": "DatasetReference",
+						"parameters": {
+							"source_file": {
+								"value": "@pipeline().parameters.source_file",
+								"type": "Expression"
+							}
+						}
+					},
+					"fieldList": [
+						"exists",
+						"size",
+						"columnCount"
+					],
+					"storeSettings": {
+						"type": "AzureBlobStorageReadSettings",
+						"enablePartitionDiscovery": false
+					},
+					"formatSettings": {
+						"type": "DelimitedTextReadSettings"
+					}
+				}
+			},
+			{
+				"name": "act_check_metadata_conditions",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "act_get_source_metadata",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@or(\r\n    not(activity('act_get_source_metadata').output.exists),\r\n    or(\r\n        equals(activity('act_get_source_metadata').output?.size, 0),\r\n        not(equals(activity('act_get_source_metadata').output?.columnCount, 17))\r\n    )\r\n)",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "act_fail_invalid_source",
+							"type": "Fail",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"message": {
+									"value": "Source file @{pipeline().parameters.source_file} failed validation. \nexists=@{activity('act_get_source_metadata').output.exists},\nsize=@{activity('act_get_source_metadata').output?.size}, \ncolumns=@{activity('act_get_source_metadata').output?.columnCount} (expected 17).",
+									"type": "Expression"
+								},
+								"errorCode": "SOURCE_FILE_INVALID"
 							}
 						}
 					]
