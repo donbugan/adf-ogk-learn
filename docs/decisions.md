@@ -87,3 +87,13 @@
 ## Pipeline Parameters
  - Source and sink file names parameterised, sink name always explicit.
  - Without one, ADF generates a name dynamically, which could be undesirable.
+
+## Failure Handling
+ - Source file validated before any rows are read: exists, size > 0, 17 columns (Get Metadata).
+ - Get Metadata is the right tool here: file properties, not rows.
+ - **Pattern** Guard clause: an If whose True branch fails the run, placed in front of the existing chain. ADF does not allow an If inside another If.
+ - **Null-safe access** For a missing file, Get Metadata returns only `exists`. `output?.size` returns null instead of an error.
+ - **Fail must be last** A failed activity followed by a completion or failure arrow that succeeds counts as handled, and the run continues. Found by testing: with the arrow reversed, the run carried on to the Lookup.
+ - Report before Fail, connected by a completion arrow, so the Fail runs even if the report cannot be written.
+ - Failure report values for size and columns are quoted strings, so a missing file still produces valid JSON.
+ - Work done on a feature branch (`feature/failure-handling`), merged to `main` by pull request.
