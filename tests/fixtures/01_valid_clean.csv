@@ -1,0 +1,4 @@
+Vehicle_ID,Registration_No,Vehicle_Category,Department,Depot_Location,Purchase_Date,Odometer_KM,Fuel_Type,Monthly_Fuel_Cost_R,Maintenance_Cost_YTD_R,Breakdowns_YTD,Downtime_Days_YTD,Last_Service_Date,Next_Service_Due,Status,Driver_Assigned,Utilization_Hours_Monthly
+TST001,CA 10001,Sedan,Test Department,Test Depot,2020-01-15,100000,Diesel,1500.00,8000.00,1,2,2025-06-01,2025-12-01,In Service,Yes,120.5
+TST002,CA 10002 WC,Truck (Heavy),Test Department,Test Depot,2021-03-10,150000,Diesel,6000.00,25000.00,0,1,2025-07-15,2026-01-15,In Service,No,80.0
+TST003,CA 10003,Motorcycle,Test Department,Test Depot,2022-08-20,50000,Petrol,700.00,2000.00,2,5,2025-05-20,2025-11-20,Under Maintenance,Yes,0.0

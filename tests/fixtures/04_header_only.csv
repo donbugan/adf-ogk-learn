@@ -1,0 +1,1 @@
+Vehicle_ID,Registration_No,Vehicle_Category,Department,Depot_Location,Purchase_Date,Odometer_KM,Fuel_Type,Monthly_Fuel_Cost_R,Maintenance_Cost_YTD_R,Breakdowns_YTD,Downtime_Days_YTD,Last_Service_Date,Next_Service_Due,Status,Driver_Assigned,Utilization_Hours_Monthly
