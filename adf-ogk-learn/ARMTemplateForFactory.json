@@ -110,6 +110,7 @@
 							"ifFalseActivities": [
 								{
 									"name": "act_copy_fleet_master",
+									"description": "quoteAllText must be true (Copy activity limitation). \nThe data flow sink also quotes all values so both writers produce the same format.",
 									"type": "Copy",
 									"dependsOn": [],
 									"policy": {
@@ -398,9 +399,16 @@
 								{
 									"name": "act_create_report",
 									"type": "WebActivity",
-									"dependsOn": [],
+									"dependsOn": [
+										{
+											"activity": "act_cleanse_fleet_vehicles",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
 									"policy": {
-										"timeout": "0.12:00:00",
+										"timeout": "0.00:30:00",
 										"retry": 0,
 										"retryIntervalInSeconds": 30,
 										"secureOutput": false,
@@ -419,13 +427,53 @@
 											"type": "Expression"
 										},
 										"body": {
-											"value": "{\n  \"source_file\": \"@{pipeline().parameters.source_file}\",\n  \"run_id\": \"@{pipeline().RunId}\",\n  \"run_time_utc\": \"@{utcNow()}\",\n  \"rule\": \"Rows with empty Vehicle_ID\",\n  \"action\": \"Pending: cleanse step not yet built\",\n  \"rows_checked\": @{activity('act_filter_nulls').output.ItemsCount},\n  \"rows_flagged\": @{activity('act_filter_nulls').output.FilteredItemsCount},\n  \"flagged_rows\": @{activity('act_filter_nulls').output.Value}\n}",
+											"value": "{\n  \"source_file\": \"@{pipeline().parameters.source_file}\",\n  \"run_id\": \"@{pipeline().RunId}\",\n  \"run_time_utc\": \"@{utcNow()}\",\n  \"rule\": \"Rows with empty Vehicle_ID\",\n  \"action\": \"NULL rows removed. Clean file written to curated\",\n  \"rows_checked\": @{activity('act_filter_nulls').output.ItemsCount},\n  \"rows_flagged\": @{activity('act_filter_nulls').output.FilteredItemsCount},\n  \"flagged_rows\": @{activity('act_filter_nulls').output.Value}\n}",
 											"type": "Expression"
 										},
 										"authentication": {
 											"type": "MSI",
 											"resource": "https://storage.azure.com/"
 										}
+									}
+								},
+								{
+									"name": "act_cleanse_fleet_vehicles",
+									"type": "ExecuteDataFlow",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.00:30:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"dataflow": {
+											"referenceName": "df_cleanse_fleet_vehicles",
+											"type": "DataFlowReference",
+											"parameters": {},
+											"datasetParameters": {
+												"srcFleetVehicles": {
+													"source_file": {
+														"value": "@pipeline().parameters.source_file",
+														"type": "Expression"
+													}
+												},
+												"snkFleetVehicles": {
+													"sink_file": {
+														"value": "@pipeline().parameters.sink_file",
+														"type": "Expression"
+													}
+												}
+											}
+										},
+										"staging": {},
+										"compute": {
+											"coreCount": 8,
+											"computeType": "General"
+										},
+										"traceLevel": "Fine"
 									}
 								}
 							]
@@ -450,7 +498,8 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/ds_fleet_vehicles_csv')]",
-				"[concat(variables('factoryId'), '/datasets/ds_fleet_vehicles_curated')]"
+				"[concat(variables('factoryId'), '/datasets/ds_fleet_vehicles_curated')]",
+				"[concat(variables('factoryId'), '/dataflows/df_cleanse_fleet_vehicles')]"
 			]
 		},
 		{
@@ -585,11 +634,81 @@
 						"container": "curated"
 					},
 					"columnDelimiter": ",",
+					"rowDelimiter": "\n",
 					"escapeChar": "\\",
 					"firstRowAsHeader": true,
 					"quoteChar": "\""
 				},
-				"schema": []
+				"schema": [
+					{
+						"name": "Vehicle_ID",
+						"type": "String"
+					},
+					{
+						"name": "Registration_No",
+						"type": "String"
+					},
+					{
+						"name": "Vehicle_Category",
+						"type": "String"
+					},
+					{
+						"name": "Department",
+						"type": "String"
+					},
+					{
+						"name": "Depot_Location",
+						"type": "String"
+					},
+					{
+						"name": "Purchase_Date",
+						"type": "String"
+					},
+					{
+						"name": "Odometer_KM",
+						"type": "String"
+					},
+					{
+						"name": "Fuel_Type",
+						"type": "String"
+					},
+					{
+						"name": "Monthly_Fuel_Cost_R",
+						"type": "String"
+					},
+					{
+						"name": "Maintenance_Cost_YTD_R",
+						"type": "String"
+					},
+					{
+						"name": "Breakdowns_YTD",
+						"type": "String"
+					},
+					{
+						"name": "Downtime_Days_YTD",
+						"type": "String"
+					},
+					{
+						"name": "Last_Service_Date",
+						"type": "String"
+					},
+					{
+						"name": "Next_Service_Due",
+						"type": "String"
+					},
+					{
+						"name": "Status",
+						"type": "String"
+					},
+					{
+						"name": "Driver_Assigned",
+						"type": "String"
+					},
+					{
+						"name": "Utilization_Hours_Monthly",
+						"type": "String"
+					}
+				]
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/ls_ogk_blob')]"
@@ -640,6 +759,94 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/pipelines/pl_copy_fleet_vehicles')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/df_cleanse_fleet_vehicles')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "ds_fleet_vehicles_csv",
+								"type": "DatasetReference"
+							},
+							"name": "srcFleetVehicles"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "ds_fleet_vehicles_curated",
+								"type": "DatasetReference"
+							},
+							"name": "snkFleetVehicles"
+						}
+					],
+					"transformations": [
+						{
+							"name": "fltValidVehicleIds"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          Vehicle_ID as string,",
+						"          Registration_No as string,",
+						"          Vehicle_Category as string,",
+						"          Department as string,",
+						"          Depot_Location as string,",
+						"          Purchase_Date as string,",
+						"          Odometer_KM as string,",
+						"          Fuel_Type as string,",
+						"          Monthly_Fuel_Cost_R as string,",
+						"          Maintenance_Cost_YTD_R as string,",
+						"          Breakdowns_YTD as string,",
+						"          Downtime_Days_YTD as string,",
+						"          Last_Service_Date as string,",
+						"          Next_Service_Due as string,",
+						"          Status as string,",
+						"          Driver_Assigned as string,",
+						"          Utilization_Hours_Monthly as string",
+						"     ),",
+						"     allowSchemaDrift: false,",
+						"     validateSchema: true,",
+						"     ignoreNoFilesFound: false) ~> srcFleetVehicles",
+						"srcFleetVehicles filter(!isNull(Vehicle_ID)) ~> fltValidVehicleIds",
+						"fltValidVehicleIds sink(allowSchemaDrift: false,",
+						"     validateSchema: false,",
+						"     input(",
+						"          Vehicle_ID as string,",
+						"          Registration_No as string,",
+						"          Vehicle_Category as string,",
+						"          Department as string,",
+						"          Depot_Location as string,",
+						"          Purchase_Date as string,",
+						"          Odometer_KM as string,",
+						"          Fuel_Type as string,",
+						"          Monthly_Fuel_Cost_R as string,",
+						"          Maintenance_Cost_YTD_R as string,",
+						"          Breakdowns_YTD as string,",
+						"          Downtime_Days_YTD as string,",
+						"          Last_Service_Date as string,",
+						"          Next_Service_Due as string,",
+						"          Status as string,",
+						"          Driver_Assigned as string,",
+						"          Utilization_Hours_Monthly as string",
+						"     ),",
+						"     partitionFileNames:['vehicles_curated.csv'],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     quoteAll: true,",
+						"     partitionBy('hash', 1)) ~> snkFleetVehicles"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/ds_fleet_vehicles_csv')]",
+				"[concat(variables('factoryId'), '/datasets/ds_fleet_vehicles_curated')]"
 			]
 		}
 	]
