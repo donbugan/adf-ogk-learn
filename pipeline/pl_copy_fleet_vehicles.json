@@ -82,6 +82,7 @@
 					"ifFalseActivities": [
 						{
 							"name": "act_copy_fleet_master",
+							"description": "quoteAllText set to false so output matches the data flow writer. See docs/decisions.md.",
 							"type": "Copy",
 							"dependsOn": [],
 							"policy": {
