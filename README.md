@@ -7,6 +7,7 @@
 
 ### Execution Steps:
 - A CSV is uploaded manually to the `raw` container in Azure Blob Storage.
+- The pipeline checks the file exists, isn't empty and has 17 columns; if not, it writes a failure report and stops.
 - The pipeline reads every row and checks for rows with an empty `Vehicle_ID`.
 - Clean file: it is copied to the `curated` container.
 - Null rows found: a data flow removes them and writes the clean file to `curated`,
@@ -31,10 +32,13 @@ Design choices and trade-offs are recorded in [docs/decisions.md](docs/decisions
 
 ### Pipeline
 
-- `pl_copy_fleet_vehicles` checks the source file before loading it:
-  1. `act_lookup_fleet_source` reads every row of the file in `raw`.
-  2. `act_filter_nulls` keeps rows where `Vehicle_ID` is empty.
-  3. `act_if_null_rows_found` branches on whether any were found.
+- `pl_copy_fleet_vehicles` validates the source file, then checks its rows before loading:
+  1. `act_get_source_metadata` reads the file's properties: exists, size, column count.
+  2. `act_check_metadata_conditions` stops the run if the file is missing, empty, or doesn't have 17 columns:
+     `act_create_failure_report` writes a report to `reports`, then `act_fail_invalid_source` fails the run with error code `SOURCE_FILE_INVALID`.
+  3. `act_lookup_fleet_source` reads every row of the file in `raw`.
+  4. `act_filter_nulls` keeps rows where `Vehicle_ID` is empty.
+  5. `act_if_null_rows_found` branches on whether any were found.
      - **False (clean file):** `act_copy_fleet_master` copies the file to `curated`.
      - **True (defects found):** `act_cleanse_fleet_vehicles` runs the data flow, then `act_create_report` writes a JSON report to `reports/<run_id>.json`.
        
@@ -74,13 +78,15 @@ Design choices and trade-offs are recorded in [docs/decisions.md](docs/decisions
    - Data rows are identical.
 - **Fixed output name in the data flow:** the data flow always writes `vehicles_curated.csv`. The `sink_file` parameter only affects the copy branch.
 - **No report on cleanse failure:** if the data flow fails, the report does not run.
+- **Renamed columns on the clean path:** the guard checks the column count, not the names. A file with 17 renamed columns passes the guard; only the data flow's schema validation catches it, and that runs only when null rows are found.
+- **Not yet checked:** a file with a header and no rows, and the same file arriving twice.
 
 ### History: the defect that started it
 
 - A blank trailing row in the source export (56 rows read against 55 vehicles) was found by comparing run counts with the source.
 - Three mitigations were considered:
   1. Mapping data flow with a Filter step. **Built.**
-  2. Validation in the pipeline (Lookup, Filter, If Condition) with a report. **Built.** Get Metadata was ruled out: it reads file properties, not rows.
+  2. Validation in the pipeline (Lookup, Filter, If Condition) with a report. **Built.** Get Metadata was ruled out for row checks; it's used for file-level checks.
   3. Database sink filtered in SQL. **Planned.**
 
 ## Cost Management
