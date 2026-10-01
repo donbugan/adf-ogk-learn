@@ -82,7 +82,7 @@
 					"ifFalseActivities": [
 						{
 							"name": "act_copy_fleet_master",
-							"description": "quoteAllText set to false so output matches the data flow writer. See docs/decisions.md.",
+							"description": "quoteAllText must be true (Copy activity limitation). \nThe data flow sink also quotes all values so both writers produce the same format.",
 							"type": "Copy",
 							"dependsOn": [],
 							"policy": {
@@ -121,7 +121,7 @@
 									},
 									"formatSettings": {
 										"type": "DelimitedTextWriteSettings",
-										"quoteAllText": false,
+										"quoteAllText": true,
 										"fileExtension": ".txt"
 									}
 								},

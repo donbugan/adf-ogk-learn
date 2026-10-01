@@ -74,6 +74,7 @@
 				"     partitionFileNames:['vehicles_curated.csv'],",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true,",
+				"     quoteAll: true,",
 				"     partitionBy('hash', 1)) ~> snkFleetVehicles"
 			]
 		}
