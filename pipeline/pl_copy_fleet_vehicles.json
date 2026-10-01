@@ -370,9 +370,16 @@
 						{
 							"name": "act_create_report",
 							"type": "WebActivity",
-							"dependsOn": [],
+							"dependsOn": [
+								{
+									"activity": "act_cleanse_fleet_vehicles",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
 							"policy": {
-								"timeout": "0.12:00:00",
+								"timeout": "0.00:30:00",
 								"retry": 0,
 								"retryIntervalInSeconds": 30,
 								"secureOutput": false,
@@ -391,13 +398,51 @@
 									"type": "Expression"
 								},
 								"body": {
-									"value": "{\n  \"source_file\": \"@{pipeline().parameters.source_file}\",\n  \"run_id\": \"@{pipeline().RunId}\",\n  \"run_time_utc\": \"@{utcNow()}\",\n  \"rule\": \"Rows with empty Vehicle_ID\",\n  \"action\": \"Pending: cleanse step not yet built\",\n  \"rows_checked\": @{activity('act_filter_nulls').output.ItemsCount},\n  \"rows_flagged\": @{activity('act_filter_nulls').output.FilteredItemsCount},\n  \"flagged_rows\": @{activity('act_filter_nulls').output.Value}\n}",
+									"value": "{\n  \"source_file\": \"@{pipeline().parameters.source_file}\",\n  \"run_id\": \"@{pipeline().RunId}\",\n  \"run_time_utc\": \"@{utcNow()}\",\n  \"rule\": \"Rows with empty Vehicle_ID\",\n  \"action\": \"NULL rows removed. Clean file written to curated\",\n  \"rows_checked\": @{activity('act_filter_nulls').output.ItemsCount},\n  \"rows_flagged\": @{activity('act_filter_nulls').output.FilteredItemsCount},\n  \"flagged_rows\": @{activity('act_filter_nulls').output.Value}\n}",
 									"type": "Expression"
 								},
 								"authentication": {
 									"type": "MSI",
 									"resource": "https://storage.azure.com/"
 								}
+							}
+						},
+						{
+							"name": "act_cleanse_fleet_vehicles",
+							"type": "ExecuteDataFlow",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.00:30:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"dataflow": {
+									"referenceName": "df_cleanse_fleet_vehicles",
+									"type": "DataFlowReference",
+									"datasetParameters": {
+										"srcFleetVehicles": {
+											"source_file": {
+												"value": "@pipeline().parameters.source_file",
+												"type": "Expression"
+											}
+										},
+										"snkFleetVehicles": {
+											"sink_file": {
+												"value": "@pipeline().parameters.sink_file",
+												"type": "Expression"
+											}
+										}
+									}
+								},
+								"compute": {
+									"coreCount": 8,
+									"computeType": "General"
+								},
+								"traceLevel": "Fine"
 							}
 						}
 					]
