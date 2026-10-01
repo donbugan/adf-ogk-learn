@@ -45,7 +45,8 @@
     - **Assumption** Silence from the data provider is consent.
  - Structural changes (columns added, removed, renamed) are not auto-fixed.
     - Enforced: schema validation on the data flow source fails the run if columns differ.
-    - Not yet built: quarantine of the failing file, and a report on failure.
+    - Report on failure built for file-level checks (missing, empty, column count).
+    - Quarantine of the failing file not yet built.
  - Sink quoting: Quote everything, per the default behaviour.
  - Pipeline will benefit from a different validation heuristic:
     - Currently there is no number validation.
