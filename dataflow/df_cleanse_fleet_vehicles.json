@@ -23,7 +23,7 @@
 			],
 			"transformations": [
 				{
-					"name": "filter1"
+					"name": "fltValidVehicleIds"
 				}
 			],
 			"scriptLines": [
@@ -49,8 +49,8 @@
 				"     allowSchemaDrift: false,",
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false) ~> srcFleetVehicles",
-				"srcFleetVehicles filter(!isNull(Vehicle_ID)) ~> filter1",
-				"filter1 sink(allowSchemaDrift: false,",
+				"srcFleetVehicles filter(!isNull(Vehicle_ID)) ~> fltValidVehicleIds",
+				"fltValidVehicleIds sink(allowSchemaDrift: false,",
 				"     validateSchema: false,",
 				"     partitionFileNames:['vehicles_curated.csv'],",
 				"     skipDuplicateMapInputs: true,",
