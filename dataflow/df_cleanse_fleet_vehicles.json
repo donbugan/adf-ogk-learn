@@ -47,7 +47,7 @@
 				"          Utilization_Hours_Monthly as string",
 				"     ),",
 				"     allowSchemaDrift: false,",
-				"     validateSchema: false,",
+				"     validateSchema: true,",
 				"     ignoreNoFilesFound: false) ~> srcFleetVehicles",
 				"srcFleetVehicles filter(!isNull(Vehicle_ID)) ~> fltValidVehicleIds",
 				"fltValidVehicleIds sink(allowSchemaDrift: false,",
