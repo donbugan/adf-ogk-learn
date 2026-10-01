@@ -120,7 +120,7 @@
 									},
 									"formatSettings": {
 										"type": "DelimitedTextWriteSettings",
-										"quoteAllText": true,
+										"quoteAllText": false,
 										"fileExtension": ".txt"
 									}
 								},
