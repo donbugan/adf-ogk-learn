@@ -5,6 +5,27 @@
  - Azure Data Factory pipeline built from scratch.
  - Version-controlled in Git, with data quality checks, automatic cleansing and reporting.
 
+```mermaid
+flowchart LR
+    A["raw CSV"] --> B["Get Metadata"]
+    B --> C{"File valid?"}
+    C -- "No" --> D["Failure report"] -- "on completion" --> E["Fail"]
+    C -- "Yes" --> F["Lookup"] --> G["Filter nulls"] --> H{"Null rows?"}
+    H -- "No" --> I["Copy to curated"]
+    H -- "Yes" --> J["Data flow to curated"] --> K["Report"]
+```
+
+### What this demonstrates
+- Data quality gating:
+   - invalid files stop the run;
+   - bad rows are removed and reported.
+- Failure handling:
+   - failure is broadcast
+   - error code and a report.
+- Testing as evidence: a byte-for-byte comparison of two writers, and a failure path tested by breaking it.
+- Cost control: budget alert, clusters only when needed, design trade-offs recorded.
+- Git workflow: feature branch and pull request into `main`.
+
 ### Execution Steps:
 - A CSV is uploaded manually to the `raw` container in Azure Blob Storage.
 - The pipeline checks the file exists, isn't empty and has 17 columns; if not, it writes a failure report and stops.
