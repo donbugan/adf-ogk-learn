@@ -24,6 +24,7 @@ Run on 1–2 October 2026. Run IDs are pipeline run IDs from Monitor > Pipeline 
 | 05 | `05_semicolon_delimited.csv` | Wrong delimiter | Reads as 1 column, guard fails, `SOURCE_FILE_INVALID`. | As expected: size 695, 1 column. Report written. | `0d56fa04-2d20-49b6-8c94-544bcda830da` |
 | 06 | `06_extra_column.csv` | Column added | 18 columns, guard fails, `SOURCE_FILE_INVALID`. | As expected: size 714, 18 columns. | `5c2eb863-a25b-4a31-89c6-2f438f6a4bbb` |
 | 07 | `07_renamed_columns.csv` | Columns renamed, same count | Guard passes (17 columns), no nulls, copy writes renamed headers. Succeeded. **Known gap.** | **Differs.** Guard passes, then the Filter fails: `Vehicle_ID` doesn't exist (renamed to `VehicleId`). Nothing written, but no report. Protection is accidental: renaming a column other than `Vehicle_ID` would pass. | `5850ebe5-4bcd-4c73-ba63-785d8234c719` |
+| 08 | `08_renamed_non_key_column.csv` | Non-key column renamed, same count | Guard passes (17 columns), Filter passes (`Vehicle_ID` present), copy writes renamed header. Succeeded. **Known gap.** | |`31cc183e-0cd9-4092-99ad-ce10c93ee538` |
 | — | `nope.csv` (no fixture) | Missing file | Guard fails with `exists=False`, `SOURCE_FILE_INVALID`. | As expected. Report written. | `d8ffddad-9a53-444a-b525-76e46685ace0` |
 | 09 | (unplanned) | Tab character in file name | — | Get Metadata fails with 400 Bad Request. The guard never runs, so no failure report. Found by accident. | `8eb20043-98d5-4d64-b667-1091783d0622` |
 
