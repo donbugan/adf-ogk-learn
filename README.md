@@ -99,8 +99,13 @@ Design choices and trade-offs are recorded in [docs/decisions.md](docs/decisions
    - Data rows are identical.
 - **Fixed output name in the data flow:** the data flow always writes `vehicles_curated.csv`. The `sink_file` parameter only affects the copy branch.
 - **No report on cleanse failure:** if the data flow fails, the report does not run.
-- **Renamed columns on the clean path:** the guard checks the column count, not the names. A file with 17 renamed columns passes the guard; only the data flow's schema validation catches it, and that runs only when null rows are found.
-- **Not yet checked:** a file with a header and no rows, and the same file arriving twice.
+- **Renamed columns** stop the run only through side effects (the guard checks the column count, not the names):
+   - the Filter, if `Vehicle_ID` is renamed;
+   - the copy's column mapping;
+   - data flow schema validation.
+   - None write a report or use `SOURCE_FILE_INVALID`. See [tests/README.md](tests/README.md).
+- **Header-only files pass:** a file with a header and no rows passes the guard and lands as an empty file in `curated` (test 04).
+- **Not yet checked:** the same file arriving twice.
 
 ### History: the defect that started it
 
