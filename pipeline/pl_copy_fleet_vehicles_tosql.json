@@ -372,6 +372,279 @@
 									}
 								}
 							]
+						},
+						{
+							"name": "act_copy_fleet_master_tosql",
+							"description": "quoteAllText must be true (Copy activity limitation). \nThe data flow sink also quotes all values so both writers produce the same format.",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [
+								{
+									"name": "Source",
+									"value": "raw/fleet/@{pipeline().parameters.source_file}"
+								},
+								{
+									"name": "Destination",
+									"value": "curated/@{pipeline().parameters.sink_file}"
+								}
+							],
+							"typeProperties": {
+								"source": {
+									"type": "DelimitedTextSource",
+									"storeSettings": {
+										"type": "AzureBlobStorageReadSettings",
+										"recursive": true,
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "DelimitedTextReadSettings"
+									}
+								},
+								"sink": {
+									"type": "AzureSqlSink",
+									"preCopyScript": "DELETE FROM stg.fleet_vehicles;",
+									"writeBehavior": "insert",
+									"sqlWriterUseTableLock": false,
+									"disableMetricsCollection": false
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"mappings": [
+										{
+											"source": {
+												"name": "Vehicle_ID",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "Vehicle_ID",
+												"type": "String",
+												"physicalType": "varchar"
+											}
+										},
+										{
+											"source": {
+												"name": "Registration_No",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "Registration_No",
+												"type": "String",
+												"physicalType": "varchar"
+											}
+										},
+										{
+											"source": {
+												"name": "Vehicle_Category",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "Vehicle_Category",
+												"type": "String",
+												"physicalType": "varchar"
+											}
+										},
+										{
+											"source": {
+												"name": "Department",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "Department",
+												"type": "String",
+												"physicalType": "varchar"
+											}
+										},
+										{
+											"source": {
+												"name": "Depot_Location",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "Depot_Location",
+												"type": "String",
+												"physicalType": "varchar"
+											}
+										},
+										{
+											"source": {
+												"name": "Purchase_Date",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "Purchase_Date",
+												"type": "String",
+												"physicalType": "varchar"
+											}
+										},
+										{
+											"source": {
+												"name": "Odometer_KM",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "Odometer_KM",
+												"type": "String",
+												"physicalType": "varchar"
+											}
+										},
+										{
+											"source": {
+												"name": "Fuel_Type",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "Fuel_Type",
+												"type": "String",
+												"physicalType": "varchar"
+											}
+										},
+										{
+											"source": {
+												"name": "Monthly_Fuel_Cost_R",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "Monthly_Fuel_Cost_R",
+												"type": "String",
+												"physicalType": "varchar"
+											}
+										},
+										{
+											"source": {
+												"name": "Maintenance_Cost_YTD_R",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "Maintenance_Cost_YTD_R",
+												"type": "String",
+												"physicalType": "varchar"
+											}
+										},
+										{
+											"source": {
+												"name": "Breakdowns_YTD",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "Breakdowns_YTD",
+												"type": "String",
+												"physicalType": "varchar"
+											}
+										},
+										{
+											"source": {
+												"name": "Downtime_Days_YTD",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "Downtime_Days_YTD",
+												"type": "String",
+												"physicalType": "varchar"
+											}
+										},
+										{
+											"source": {
+												"name": "Last_Service_Date",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "Last_Service_Date",
+												"type": "String",
+												"physicalType": "varchar"
+											}
+										},
+										{
+											"source": {
+												"name": "Next_Service_Due",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "Next_Service_Due",
+												"type": "String",
+												"physicalType": "varchar"
+											}
+										},
+										{
+											"source": {
+												"name": "Status",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "Status",
+												"type": "String",
+												"physicalType": "varchar"
+											}
+										},
+										{
+											"source": {
+												"name": "Driver_Assigned",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "Driver_Assigned",
+												"type": "String",
+												"physicalType": "varchar"
+											}
+										},
+										{
+											"source": {
+												"name": "Utilization_Hours_Monthly",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "Utilization_Hours_Monthly",
+												"type": "String",
+												"physicalType": "varchar"
+											}
+										}
+									],
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "ds_fleet_vehicles_csv",
+									"type": "DatasetReference",
+									"parameters": {
+										"source_file": "@pipeline().parameters.source_file"
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "ds_fleet_vehicles_stg",
+									"type": "DatasetReference"
+								}
+							]
 						}
 					],
 					"ifTrueActivities": [

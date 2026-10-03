@@ -1,0 +1,85 @@
+{
+	"name": "ds_fleet_vehicles_stg",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_ogk_sql",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "Vehicle_ID",
+				"type": "varchar"
+			},
+			{
+				"name": "Registration_No",
+				"type": "varchar"
+			},
+			{
+				"name": "Vehicle_Category",
+				"type": "varchar"
+			},
+			{
+				"name": "Department",
+				"type": "varchar"
+			},
+			{
+				"name": "Depot_Location",
+				"type": "varchar"
+			},
+			{
+				"name": "Purchase_Date",
+				"type": "varchar"
+			},
+			{
+				"name": "Odometer_KM",
+				"type": "varchar"
+			},
+			{
+				"name": "Fuel_Type",
+				"type": "varchar"
+			},
+			{
+				"name": "Monthly_Fuel_Cost_R",
+				"type": "varchar"
+			},
+			{
+				"name": "Maintenance_Cost_YTD_R",
+				"type": "varchar"
+			},
+			{
+				"name": "Breakdowns_YTD",
+				"type": "varchar"
+			},
+			{
+				"name": "Downtime_Days_YTD",
+				"type": "varchar"
+			},
+			{
+				"name": "Last_Service_Date",
+				"type": "varchar"
+			},
+			{
+				"name": "Next_Service_Due",
+				"type": "varchar"
+			},
+			{
+				"name": "Status",
+				"type": "varchar"
+			},
+			{
+				"name": "Driver_Assigned",
+				"type": "varchar"
+			},
+			{
+				"name": "Utilization_Hours_Monthly",
+				"type": "varchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "stg",
+			"table": "fleet_vehicles"
+		}
+	}
+}
