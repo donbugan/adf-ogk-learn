@@ -393,6 +393,39 @@
 						"type": "DatasetReference"
 					}
 				]
+			},
+			{
+				"name": "act_merge_fleet_vehicles",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "act_copy_fleet_master_tosql",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.00:10:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderStoredProcedureName": "[dbo].[usp_merge_fleet_vehicles]",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "ds_fleet_vehicles_stg",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": true
+				}
 			}
 		],
 		"parameters": {
