@@ -1,0 +1,14 @@
+{
+	"name": "ls_ogk_sql",
+	"properties": {
+		"annotations": [],
+		"type": "AzureSqlDatabase",
+		"typeProperties": {
+			"server": "sql-ogk-adf-learn.database.windows.net",
+			"database": "sql-db-ogk-fleet",
+			"encrypt": "mandatory",
+			"trustServerCertificate": false,
+			"authenticationType": "SystemAssignedManagedIdentity"
+		}
+	}
+}
