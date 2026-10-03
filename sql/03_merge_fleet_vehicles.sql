@@ -69,3 +69,7 @@ BEGIN
          , @merged_rows        AS merged_rows;
 END;
 GO
+
+GRANT EXECUTE ON OBJECT::dbo.usp_merge_fleet_vehicles TO [adf-ogk-learn];
+GO
+
