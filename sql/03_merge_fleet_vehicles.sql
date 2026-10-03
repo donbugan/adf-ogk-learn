@@ -1,5 +1,14 @@
-MERGE INTO dbo.fleet_vehicles AS target
-USING (
+CREATE OR ALTER PROCEDURE dbo.usp_merge_fleet_vehicles
+AS 
+BEGIN
+    SET NOCOUNT ON;
+    DECLARE @staged_rows INT, @rejected_blank_key INT, @merged_rows INT;
+
+    SELECT @staged_rows = COUNT(*), @rejected_blank_key = COUNT(*) - COUNT(Vehicle_ID)
+    FROM stg.fleet_vehicles;
+
+    MERGE INTO dbo.fleet_vehicles AS target
+    USING (
        SELECT Vehicle_ID
         , Registration_No
         , Vehicle_Category
@@ -18,9 +27,9 @@ USING (
         , TRY_CONVERT(decimal(10, 2), Maintenance_Cost_YTD_R)    AS Maintenance_Cost_YTD_R
         , TRY_CONVERT(decimal(5, 1), Utilization_Hours_Monthly)  AS Utilization_Hours_Monthly
        FROM stg.fleet_vehicles WHERE Vehicle_ID IS NOT NULL
-) AS source
-ON (target.Vehicle_ID = source.Vehicle_ID)
-WHEN MATCHED THEN
+    ) AS source
+    ON (target.Vehicle_ID = source.Vehicle_ID)
+    WHEN MATCHED THEN
     UPDATE SET 
         target.Registration_No	            = source.Registration_No
         , target.Vehicle_Category	        = source.Vehicle_Category
@@ -39,7 +48,7 @@ WHEN MATCHED THEN
         , target.Driver_Assigned	        = source.Driver_Assigned
         , target.Utilization_Hours_Monthly  = source.Utilization_Hours_Monthly
         , target.Updated_At_UTC             = SYSUTCDATETIME()
-WHEN NOT MATCHED THEN 
+    WHEN NOT MATCHED THEN 
     INSERT (
         Vehicle_ID, Registration_No, Vehicle_Category, Department, 
         Depot_Location, Purchase_Date, Odometer_KM, Fuel_Type, 
@@ -53,3 +62,10 @@ WHEN NOT MATCHED THEN
         source.Last_Service_Date, source.Next_Service_Due, source.Status, source.Driver_Assigned, 
         source.Utilization_Hours_Monthly, SYSUTCDATETIME(), SYSUTCDATETIME()
     );
+    SET @merged_rows = @@ROWCOUNT;
+
+    SELECT @staged_rows        AS staged_rows
+         , @rejected_blank_key AS rejected_blank_key
+         , @merged_rows        AS merged_rows;
+END;
+GO
