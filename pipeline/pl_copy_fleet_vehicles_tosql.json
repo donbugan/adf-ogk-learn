@@ -426,6 +426,46 @@
 					},
 					"firstRowOnly": true
 				}
+			},
+			{
+				"name": "act_create_report",
+				"type": "WebActivity",
+				"dependsOn": [
+					{
+						"activity": "act_merge_fleet_vehicles",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.00:30:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"method": "PUT",
+					"headers": {
+						"x-ms-blob-type": "BlockBlob",
+						"x-ms-version": "2021-08-06",
+						"Content-Type": "application/json"
+					},
+					"url": {
+						"value": "@concat(\n    'https://ogksa.blob.core.windows.net/reports/', \n    pipeline().RunId, \n    '.json')",
+						"type": "Expression"
+					},
+					"body": {
+						"value": "{\n  \"source_file\": \"@{pipeline().parameters.source_file}\",\n  \"run_id\": \"@{pipeline().RunId}\",\n  \"run_time_utc\": \"@{utcNow()}\",\n  \"rule\": \"Reject rows with empty Vehicle_ID\",\n  \"action\": \"File is loaded to stg.fleet_vehicles (source).\\nOnly valid rows are merged into dbo.fleet_vehicles (target).\\nWe do not delete any data from the target\",\n  \"rows_read\": @{activity('act_copy_fleet_master_tosql').output.rowsRead},\n  \"rows_copied\": @{activity('act_copy_fleet_master_tosql').output.rowsCopied},\n  \"staged_rows\": @{activity('act_merge_fleet_vehicles').output.firstRow.staged_rows},\n  \"rejected_blank_key\": @{activity('act_merge_fleet_vehicles').output.firstRow.rejected_blank_key},\n  \"merged_rows\": @{activity('act_merge_fleet_vehicles').output.firstRow.merged_rows}\n}",
+						"type": "Expression"
+					},
+					"authentication": {
+						"type": "MSI",
+						"resource": "https://storage.azure.com/"
+					}
+				}
 			}
 		],
 		"parameters": {
