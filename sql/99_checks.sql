@@ -10,3 +10,9 @@ SELECT COUNT(*)                                                         AS targe
 SELECT COUNT(*)                                                         AS target_rows
      , SUM(CASE WHEN Updated_At_UTC > Created_At_UTC THEN 1 ELSE 0 END) AS rows_updated
 FROM dbo.fleet_vehicles;
+
+--Merge as Stored Proc
+EXEC dbo.usp_merge_fleet_vehicles;
+
+--Confirm Stored Proc count
+SELECT COUNT(*) AS target_rows FROM dbo.fleet_vehicles;
