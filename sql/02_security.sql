@@ -7,3 +7,6 @@ END;
 ALTER ROLE db_datareader ADD MEMBER [adf-ogk-learn]; 
 ALTER ROLE db_datawriter ADD MEMBER [adf-ogk-learn];
 GO
+
+GRANT EXECUTE ON OBJECT::dbo.usp_merge_fleet_vehicles TO [adf-ogk-learn];
+GO
