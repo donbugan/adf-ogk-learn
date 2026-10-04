@@ -111,7 +111,9 @@ Design choices and trade-offs are recorded in [docs/decisions.md](docs/decisions
 
 - One parameter: `source_file`, default `Vehicle_Master.csv`.
 - The copy and the Lookup retry 3 times, 30 seconds apart, because the database pauses when idle.
-- Verified in debug run `579f934c-bfbf-4f05-87b2-f7fafd2a00e6`: 56 rows read, 56 staged, 1 rejected, 55 merged.
+- **Verified** 56 rows read, 56 staged, 1 rejected, 55 merged, in both runs:
+  - triggered run `aded181f-2d4a-4002-8ee6-2293f350cf09` on the published factory (4 October 2026)
+  - debug run `579f934c-bfbf-4f05-87b2-f7fafd2a00e6` (3 October 2026)
 - Loading the same file twice does not duplicate rows (verified: second run, 55 updated, 0 inserted).
   
 ### Data flow
@@ -168,7 +170,8 @@ Design choices and trade-offs are recorded in [docs/decisions.md](docs/decisions
 - **Not yet checked:** the same file arriving twice.
 
 SQL path:
-- **Debug runs only:** `pl_copy_fleet_vehicles_tosql` has not been published and has no trigger.
+- **No schedule:** `pl_copy_fleet_vehicles_tosql` is published and runs on demand. It has no schedule trigger.
+- **Retry path not yet exercised:** no run has started while the database was paused, so the 3 retries on the copy are untested.
 - **Scripts are applied by hand:** the files in `sql/` were run in the query editor. There is no automated database deployment.
 - **Only blank keys are counted as rejects:** a value that cannot be converted becomes NULL, and the target's `NOT NULL` constraint then fails the whole merge. Not yet tested. Reject logging per row is planned.
 - **No report when the load fails:** the reconciliation report runs only after the merge succeeds.
