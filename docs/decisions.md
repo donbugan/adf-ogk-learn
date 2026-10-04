@@ -168,7 +168,7 @@
  - **Reason** The Stored Procedure activity reports success or failure only and discards result sets. The Lookup exposes the returned row to the report as `output.firstRow`.
  - The copy activity's own data consistency verification is left off. The pipeline's reconciliation report covers it.
  - Report runs after the merge succeeds, same Web activity pattern as the original pipeline.
- - Work done on a feature branch (`feature/sql-sink`).
+ - Work done on a feature branch (`feature/sql-sink`), merged to `main` by pull request.
 
 ## SQL Sink: Transient Faults
  - The serverless database pauses when idle. The first connection after that is refused and wakes it; a retry succeeds. Observed in the query editor on 3 October 2026: refused at 18:55, succeeded at 18:57 (SAST).
