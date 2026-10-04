@@ -11,6 +11,14 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'ls_ogk_blob'"
 		},
+		"ls_ogk_sql_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "sql-ogk-adf-learn.database.windows.net"
+		},
+		"ls_ogk_sql_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "sql-db-ogk-fleet"
+		},
 		"trg_copy_fleet_vehicles_properties_pl_copy_fleet_vehicles_parameters_source_file": {
 			"type": "string",
 			"defaultValue": "Vehicle_Master.csv"
@@ -33,6 +41,23 @@
 				"type": "AzureBlobStorage",
 				"typeProperties": {
 					"connectionString": "[parameters('ls_ogk_blob_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ls_ogk_sql')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"server": "[parameters('ls_ogk_sql_properties_typeProperties_server')]",
+					"database": "[parameters('ls_ogk_sql_properties_typeProperties_database')]",
+					"encrypt": "mandatory",
+					"trustServerCertificate": false,
+					"authenticationType": "SystemAssignedManagedIdentity"
 				}
 			},
 			"dependsOn": []
@@ -247,6 +272,587 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/ls_ogk_blob')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_fleet_vehicles_stg')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_ogk_sql",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "Vehicle_ID",
+						"type": "varchar"
+					},
+					{
+						"name": "Registration_No",
+						"type": "varchar"
+					},
+					{
+						"name": "Vehicle_Category",
+						"type": "varchar"
+					},
+					{
+						"name": "Department",
+						"type": "varchar"
+					},
+					{
+						"name": "Depot_Location",
+						"type": "varchar"
+					},
+					{
+						"name": "Purchase_Date",
+						"type": "varchar"
+					},
+					{
+						"name": "Odometer_KM",
+						"type": "varchar"
+					},
+					{
+						"name": "Fuel_Type",
+						"type": "varchar"
+					},
+					{
+						"name": "Monthly_Fuel_Cost_R",
+						"type": "varchar"
+					},
+					{
+						"name": "Maintenance_Cost_YTD_R",
+						"type": "varchar"
+					},
+					{
+						"name": "Breakdowns_YTD",
+						"type": "varchar"
+					},
+					{
+						"name": "Downtime_Days_YTD",
+						"type": "varchar"
+					},
+					{
+						"name": "Last_Service_Date",
+						"type": "varchar"
+					},
+					{
+						"name": "Next_Service_Due",
+						"type": "varchar"
+					},
+					{
+						"name": "Status",
+						"type": "varchar"
+					},
+					{
+						"name": "Driver_Assigned",
+						"type": "varchar"
+					},
+					{
+						"name": "Utilization_Hours_Monthly",
+						"type": "varchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "stg",
+					"table": "fleet_vehicles"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_ogk_sql')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pl_copy_fleet_vehicles_tosql')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "act_get_source_metadata",
+						"type": "GetMetadata",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.00:10:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "ds_fleet_vehicles_csv",
+								"type": "DatasetReference",
+								"parameters": {
+									"source_file": {
+										"value": "@pipeline().parameters.source_file",
+										"type": "Expression"
+									}
+								}
+							},
+							"fieldList": [
+								"exists",
+								"size",
+								"columnCount"
+							],
+							"storeSettings": {
+								"type": "AzureBlobStorageReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
+							},
+							"formatSettings": {
+								"type": "DelimitedTextReadSettings"
+							}
+						}
+					},
+					{
+						"name": "act_check_metadata_conditions",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "act_get_source_metadata",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@or(\r\n    not(activity('act_get_source_metadata').output.exists),\r\n    or(\r\n        equals(activity('act_get_source_metadata').output?.size, 0),\r\n        not(equals(activity('act_get_source_metadata').output?.columnCount, 17))\r\n    )\r\n)",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "act_fail_invalid_source",
+									"type": "Fail",
+									"dependsOn": [
+										{
+											"activity": "act_create_failure_report",
+											"dependencyConditions": [
+												"Completed"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"message": {
+											"value": "Source file @{pipeline().parameters.source_file} failed validation. \nexists=@{activity('act_get_source_metadata').output.exists},\nsize=@{activity('act_get_source_metadata').output?.size}, \ncolumns=@{activity('act_get_source_metadata').output?.columnCount} (expected 17).",
+											"type": "Expression"
+										},
+										"errorCode": "SOURCE_FILE_INVALID"
+									}
+								},
+								{
+									"name": "act_create_failure_report",
+									"type": "WebActivity",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.00:30:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"method": "PUT",
+										"headers": {
+											"x-ms-blob-type": "BlockBlob",
+											"x-ms-version": "2021-08-06",
+											"Content-Type": "application/json"
+										},
+										"url": {
+											"value": "@concat(\n    'https://ogksa.blob.core.windows.net/reports/', \n    pipeline().RunId, \n    '.json')",
+											"type": "Expression"
+										},
+										"body": {
+											"value": "{\n  \"source_file\": \"@{pipeline().parameters.source_file}\",\n  \"run_id\": \"@{pipeline().RunId}\",\n  \"run_time_utc\": \"@{utcNow()}\",\n  \"rule\": \"Source file validation\",\n  \"action\": \"Run stopped before load\",\n  \"exists\": \"@{activity('act_get_source_metadata').output.exists}\",\n  \"size\": \"@{activity('act_get_source_metadata').output?.size}\",\n  \"columns\": \"@{activity('act_get_source_metadata').output?.columnCount}\",\n  \"expected_columns\": 17\n}",
+											"type": "Expression"
+										},
+										"authentication": {
+											"type": "MSI",
+											"resource": "https://storage.azure.com/"
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "act_copy_fleet_master_tosql",
+						"description": "quoteAllText must be true (Copy activity limitation). \nThe data flow sink also quotes all values so both writers produce the same format.",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "act_check_metadata_conditions",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.00:10:00",
+							"retry": 3,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [
+							{
+								"name": "Source",
+								"value": "raw/fleet/@{pipeline().parameters.source_file}"
+							},
+							{
+								"name": "Destination",
+								"value": "sql-db-ogk-fleet/stg.fleet_vehicles"
+							}
+						],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"preCopyScript": "DELETE FROM stg.fleet_vehicles;",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false,
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "Vehicle_ID",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "Vehicle_ID",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Registration_No",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "Registration_No",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Vehicle_Category",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "Vehicle_Category",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Department",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "Department",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Depot_Location",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "Depot_Location",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Purchase_Date",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "Purchase_Date",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Odometer_KM",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "Odometer_KM",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Fuel_Type",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "Fuel_Type",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Monthly_Fuel_Cost_R",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "Monthly_Fuel_Cost_R",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Maintenance_Cost_YTD_R",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "Maintenance_Cost_YTD_R",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Breakdowns_YTD",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "Breakdowns_YTD",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Downtime_Days_YTD",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "Downtime_Days_YTD",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Last_Service_Date",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "Last_Service_Date",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Next_Service_Due",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "Next_Service_Due",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Status",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "Status",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Driver_Assigned",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "Driver_Assigned",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Utilization_Hours_Monthly",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "Utilization_Hours_Monthly",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									}
+								],
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "ds_fleet_vehicles_csv",
+								"type": "DatasetReference",
+								"parameters": {
+									"source_file": "@pipeline().parameters.source_file"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "ds_fleet_vehicles_stg",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					},
+					{
+						"name": "act_merge_fleet_vehicles",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "act_copy_fleet_master_tosql",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.00:10:00",
+							"retry": 3,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderStoredProcedureName": "[[dbo].[usp_merge_fleet_vehicles]",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "ds_fleet_vehicles_stg",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": true
+						}
+					},
+					{
+						"name": "act_create_report",
+						"type": "WebActivity",
+						"dependsOn": [
+							{
+								"activity": "act_merge_fleet_vehicles",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.00:30:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"method": "PUT",
+							"headers": {
+								"x-ms-blob-type": "BlockBlob",
+								"x-ms-version": "2021-08-06",
+								"Content-Type": "application/json"
+							},
+							"url": {
+								"value": "@concat(\n    'https://ogksa.blob.core.windows.net/reports/', \n    pipeline().RunId, \n    '.json')",
+								"type": "Expression"
+							},
+							"body": {
+								"value": "{\n  \"source_file\": \"@{pipeline().parameters.source_file}\",\n  \"run_id\": \"@{pipeline().RunId}\",\n  \"run_time_utc\": \"@{utcNow()}\",\n  \"rule\": \"Reject rows with empty Vehicle_ID\",\n  \"action\": \"File is loaded to stg.fleet_vehicles (source).\\nOnly valid rows are merged into dbo.fleet_vehicles (target).\\nWe do not delete any data from the target\",\n  \"rows_read\": @{activity('act_copy_fleet_master_tosql').output.rowsRead},\n  \"rows_copied\": @{activity('act_copy_fleet_master_tosql').output.rowsCopied},\n  \"staged_rows\": @{activity('act_merge_fleet_vehicles').output.firstRow.staged_rows},\n  \"rejected_blank_key\": @{activity('act_merge_fleet_vehicles').output.firstRow.rejected_blank_key},\n  \"merged_rows\": @{activity('act_merge_fleet_vehicles').output.firstRow.merged_rows}\n}",
+								"type": "Expression"
+							},
+							"authentication": {
+								"type": "MSI",
+								"resource": "https://storage.azure.com/"
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"source_file": {
+						"type": "string",
+						"defaultValue": "Vehicle_Master.csv"
+					}
+				},
+				"annotations": [],
+				"lastPublishTime": "2026-09-29T18:07:56Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/ds_fleet_vehicles_csv')]",
+				"[concat(variables('factoryId'), '/datasets/ds_fleet_vehicles_stg')]"
 			]
 		},
 		{

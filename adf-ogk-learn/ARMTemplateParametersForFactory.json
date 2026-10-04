@@ -8,6 +8,12 @@
 		"ls_ogk_blob_connectionString": {
 			"value": ""
 		},
+		"ls_ogk_sql_properties_typeProperties_server": {
+			"value": "sql-ogk-adf-learn.database.windows.net"
+		},
+		"ls_ogk_sql_properties_typeProperties_database": {
+			"value": "sql-db-ogk-fleet"
+		},
 		"trg_copy_fleet_vehicles_properties_pl_copy_fleet_vehicles_parameters_source_file": {
 			"value": "Vehicle_Master.csv"
 		},

@@ -11,6 +11,14 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'ls_ogk_blob'"
 		},
+		"ls_ogk_sql_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "sql-ogk-adf-learn.database.windows.net"
+		},
+		"ls_ogk_sql_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "sql-db-ogk-fleet"
+		},
 		"trg_copy_fleet_vehicles_properties_pl_copy_fleet_vehicles_parameters_source_file": {
 			"type": "string",
 			"defaultValue": "Vehicle_Master.csv"
@@ -48,6 +56,12 @@
 					},
 					"ls_ogk_blob_connectionString": {
 						"value": "[parameters('ls_ogk_blob_connectionString')]"
+					},
+					"ls_ogk_sql_properties_typeProperties_server": {
+						"value": "[parameters('ls_ogk_sql_properties_typeProperties_server')]"
+					},
+					"ls_ogk_sql_properties_typeProperties_database": {
+						"value": "[parameters('ls_ogk_sql_properties_typeProperties_database')]"
 					},
 					"trg_copy_fleet_vehicles_properties_pl_copy_fleet_vehicles_parameters_source_file": {
 						"value": "[parameters('trg_copy_fleet_vehicles_properties_pl_copy_fleet_vehicles_parameters_source_file')]"
